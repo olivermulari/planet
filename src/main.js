@@ -81,15 +81,8 @@ window.addEventListener('DOMContentLoaded', function() {
     engine.resize();
   });
 
-  // after first render
-  let count = 0;
-  const updateBreak = 1;
   scene.registerBeforeRender(function() {
-    if (count % updateBreak === 0) { // %60
-      scene.planet.update();
-    }
-    count++;
-
+    scene.planet.update();
     updateCameraSpeed(camera);
   });
 });
