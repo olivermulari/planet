@@ -5,45 +5,45 @@ const sharpenRatio = 8;
 
 export default class Side {
   constructor(info, planet, resolution) {
-      this.planet = planet;
-      this.parent = planet;
-      this.parents = [];
-      this.name = info.name;
-      this.depth = 1;
-      this.direction = info.dir;
-      this.rotX = info.rotX;
-      this.rotY = info.rotY;
-      this.size = ((1.0 / Math.sqrt(3)) * this.planet.size) * 2.0;
-      this.mesh = null;
-      this.roundingVector = new BABYLON.Vector3(0, 1.0, 0).scale(this.size / 2.0); // assistent of rounding vertex data
-      this.material = this.planet.material;
-      this.resolution = resolution;
-      this.chuncks = [];
-      this.create(info);
+    this.planet = planet;
+    this.parent = planet;
+    this.parents = [];
+    this.name = info.name;
+    this.depth = 1;
+    this.direction = info.dir;
+    this.rotX = info.rotX;
+    this.rotY = info.rotY;
+    this.size = ((1.0 / Math.sqrt(3)) * this.planet.size) * 2.0;
+    this.mesh = null;
+    this.roundingVector = new BABYLON.Vector3(0, 1.0, 0).scale(this.size / 2.0); // assistent of rounding vertex data
+    this.material = this.planet.material;
+    this.resolution = resolution;
+    this.chuncks = [];
+    this.create(info);
   }
   create(info) {
-      this.mesh = BABYLON.MeshBuilder.CreateGround(this.name, {height: this.size, width: this.size, subdivisions: this.planet.resolution, updatable: true}, this.planet.scene);
-      this.mesh.position = this.planet.position.add(info.dir.scale(this.size / 2.0));
-      this.mesh.rotate(new BABYLON.Vector3(1, 0, 0), info.rotX, BABYLON.Space.WORLD);
-      this.mesh.rotate(new BABYLON.Vector3(0, 1, 0), info.rotY, BABYLON.Space.WORLD);
-      this.mesh.material = this.material;
-      this.mesh.chunck = this;
+    this.mesh = BABYLON.MeshBuilder.CreateGround(this.name, {height: this.size, width: this.size, subdivisions: this.planet.resolution, updatable: true}, this.planet.scene);
+    this.mesh.position = this.planet.position.add(info.dir.scale(this.size / 2.0));
+    this.mesh.rotate(new BABYLON.Vector3(1, 0, 0), info.rotX, BABYLON.Space.WORLD);
+    this.mesh.rotate(new BABYLON.Vector3(0, 1, 0), info.rotY, BABYLON.Space.WORLD);
+    this.mesh.material = this.material;
+    this.mesh.chunck = this;
 
-      // this.round();
-      // this.calculateNormals();
+    // this.round();
+    // this.calculateNormals();
   }
 
   round(mesh) {
-      const getLocalPos = (x, y, z) => {
-          const localPos = new BABYLON.Vector3(x, y, z);
-          const pos = localPos.add(this.roundingVector);
-          const scale2 = this.planet.size / pos.length();
-          return pos.scale(scale2).add(this.roundingVector.negate());
-      };
-      var positions = mesh.getVerticesData(BABYLON.VertexBuffer.PositionKind);
-      for(let i = 0; i<positions.length/3; i++) {
-          const v = getLocalPos(positions[i*3], positions[i*3+1], positions[i*3+2]);
-          /*
+    const getLocalPos = (x, y, z) => {
+      const localPos = new BABYLON.Vector3(x, y, z);
+      const pos = localPos.add(this.roundingVector);
+      const scale2 = this.planet.size / pos.length();
+      return pos.scale(scale2).add(this.roundingVector.negate());
+    };
+    var positions = mesh.getVerticesData(BABYLON.VertexBuffer.PositionKind);
+    for(let i = 0; i<positions.length/3; i++) {
+      const v = getLocalPos(positions[i*3], positions[i*3+1], positions[i*3+2]);
+      /*
           const x = positions[i*3];
           const y = positions[i*3+1];
           const z = positions[i*3+2];
@@ -53,31 +53,31 @@ export default class Side {
             z: z * Math.sqrt(1 - (Math.pow(x, 2) / 2) - (Math.pow(y, 2) / 2) + ((Math.pow(x, 2) * Math.pow(y, 2)) / 3))
           }
           */
-          positions[i*3] = v.x;
-          positions[i*3+1] = v.y;
-          positions[i*3+2] = v.z;
-      }
-      mesh.updateVerticesData(BABYLON.VertexBuffer.PositionKind, positions);
+      positions[i*3] = v.x;
+      positions[i*3+1] = v.y;
+      positions[i*3+2] = v.z;
+    }
+    mesh.updateVerticesData(BABYLON.VertexBuffer.PositionKind, positions);
 
-      // working!! makes a box around object
-      mesh.refreshBoundingInfo(true);    
+    // working!! makes a box around object
+    mesh.refreshBoundingInfo(true);    
   }
 
   calculateNormals(mesh) {
-      const getAngle = (x, y, z) => {
-          const localPos = new BABYLON.Vector3(x, y, z);
-          const pos = localPos.add(this.roundingVector);
-          return pos.scale(1.0 / pos.length());
-      };
-      var normals = mesh.getVerticesData(BABYLON.VertexBuffer.NormalKind);
-      var positions = mesh.getVerticesData(BABYLON.VertexBuffer.PositionKind);
-      for(var i = 0; i<normals.length/3; i++) {
-          const v = getAngle(positions[i*3], positions[i*3+1], positions[i*3+2]);
-          normals[i*3] = v.x;
-          normals[i*3+1] = v.y;
-          normals[i*3+2] = v.z;
-      }
-      mesh.updateVerticesData(BABYLON.VertexBuffer.NormalKind, normals);
+    const getAngle = (x, y, z) => {
+      const localPos = new BABYLON.Vector3(x, y, z);
+      const pos = localPos.add(this.roundingVector);
+      return pos.scale(1.0 / pos.length());
+    };
+    var normals = mesh.getVerticesData(BABYLON.VertexBuffer.NormalKind);
+    var positions = mesh.getVerticesData(BABYLON.VertexBuffer.PositionKind);
+    for(var i = 0; i<normals.length/3; i++) {
+      const v = getAngle(positions[i*3], positions[i*3+1], positions[i*3+2]);
+      normals[i*3] = v.x;
+      normals[i*3+1] = v.y;
+      normals[i*3+2] = v.z;
+    }
+    mesh.updateVerticesData(BABYLON.VertexBuffer.NormalKind, normals);
   }
 
   /*
@@ -101,34 +101,34 @@ export default class Side {
   */
 
   checkIfMakeChuncks(dist) {
-      if (dist < sharpenRatio * this.size) {
-          this.makeChuncks();
-          this.mesh.setEnabled(false);
-          return true;
-      } else {
-          this.disposeChuncks();
-          return false;
-      }
+    if (dist < sharpenRatio * this.size) {
+      this.makeChuncks();
+      this.mesh.setEnabled(false);
+      return true;
+    } else {
+      this.disposeChuncks();
+      return false;
+    }
   }
 
   // not in use
   checkIfDisposeChuncks(dist) {
-      if (dist >= sharpenRatio * this.size) {
-          this.disposeChuncks();
-          return true;
-      } else {
-          return false;
-      }
+    if (dist >= sharpenRatio * this.size) {
+      this.disposeChuncks();
+      return true;
+    } else {
+      return false;
+    }
   }
 
   makeChuncks() {
-      const offSet = this.size / 4.0;
-      const relativePositions = {
-          1: (new BABYLON.Vector3(-1.0, 0, 1.0).scale(offSet)),
-          2: (new BABYLON.Vector3(1.0, 0, 1.0).scale(offSet)),
-          3: (new BABYLON.Vector3(-1.0, 0, -1.0).scale(offSet)),
-          4: (new BABYLON.Vector3(1.0, 0, -1.0).scale(offSet)),
-      }
+    const offSet = this.size / 4.0;
+    const relativePositions = {
+      1: (new BABYLON.Vector3(-1.0, 0, 1.0).scale(offSet)),
+      2: (new BABYLON.Vector3(1.0, 0, 1.0).scale(offSet)),
+      3: (new BABYLON.Vector3(-1.0, 0, -1.0).scale(offSet)),
+      4: (new BABYLON.Vector3(1.0, 0, -1.0).scale(offSet)),
+    };
       /*
       const materials = {
           1: createPlastic(this.planet.scene),
@@ -138,23 +138,23 @@ export default class Side {
       };
       */
 
-      // tee neljä pienempää tasoa samalla resoluutiolla
-      for (let i = 1; i <= 4; i++) {
-          const chunck = new Chunck(`${this.name}_Chunck${i}`, this, this, this.planet.scene.glassMaterials[i - 1], relativePositions[i]);
-          this.chuncks.push(chunck);
-      }
+    // tee neljä pienempää tasoa samalla resoluutiolla
+    for (let i = 1; i <= 4; i++) {
+      const chunck = new Chunck(`${this.name}_Chunck${i}`, this, this, this.planet.scene.glassMaterials[i - 1], relativePositions[i]);
+      this.chuncks.push(chunck);
+    }
   }
 
   disposeChuncks() {
-      this.chuncks.forEach((chunck) => {
-          chunck.disposeChuncks();
-          chunck.mesh.dispose(); 
-      });
-      this.chuncks = [];
-      this.mesh.setEnabled(true);
+    this.chuncks.forEach((chunck) => {
+      chunck.disposeChuncks();
+      chunck.mesh.dispose(); 
+    });
+    this.chuncks = [];
+    this.mesh.setEnabled(true);
   }
 
   isSide() {
-      return true;
+    return true;
   }
 }
