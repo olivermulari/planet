@@ -2,6 +2,7 @@ import Planet from "./components/planet";
 import * as BABYLON from "@babylonjs/core/Legacy/legacy";
 
 import { createSkybox } from "./scripts/skybox";
+import { createArcRotateCamera } from "./scripts/camera";
 import { addDebugKeycodes } from "./scripts/controls";
 import { createMetal, createPlastic } from "./scripts/materials";
 
@@ -9,6 +10,8 @@ import './styles/style.css';
 
 const resolution = 12; // 32 is a good standard even 6 is working
 const smallestPart = 0.05;
+const planetRadius = 20;
+const planetCenter = new BABYLON.Vector3(0, 0, 0);
 
 // Time for debugging purposes
 const startTime = new Date().getTime() / 1000.0;
@@ -19,9 +22,6 @@ function logTime(msg) {
   nowTime = new Date().getTime() / 1000.0;
   console.log(msg + ' in ' + String(nowTime - startTime).substring(0, 5) + 's.');
 }
-
-const planetRadius = 20;
-const planetCenter = new BABYLON.Vector3(0, 0, 0);
 
 window.addEventListener('DOMContentLoaded', function() {
 
@@ -34,29 +34,12 @@ window.addEventListener('DOMContentLoaded', function() {
     var createScene = function() {
         // Create a basic BJS Scene object.
         const scene = new BABYLON.Scene(engine);
-
-        // Apply gravity
-        // scene.enablePhysics();
-        // fysiikat kameralle ja planeetan alimmalle tasolle
-        // skull.physicsImpostor = new BABYLON.PhysicsImpostor(skull, BABYLON.PhysicsImpostor.MeshImpostor, {mass: 0, friction: 0, restitution: 0.3});
-        scene.gravity = new BABYLON.Vector3(0, -9.81, 0);
-        scene.collisionsEnabled = true;
-    
-        /*
-        // Create a FreeCamera, and set its position to (x:0, y:5, z:-10).
-        var camera = new BABYLON.FreeCamera('camera', new BABYLON.Vector3(0, 15,-50), scene);
-        camera.setTarget(BABYLON.Vector3.Zero());
-        */
-
-        // Creates, angles, distances and targets the camera
-	      camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 0, new BABYLON.Vector3(0, 0, 0), scene);
-        camera.setPosition(new BABYLON.Vector3(0, 40, -170));
-    
-        // Attach the camera to the canvas.
-        camera.attachControl(canvas, false);
-    
         // Create a basic light, aiming 0,1,0 - meaning, to the sky.
         var light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0,1,0), scene);
+    
+        // create camera
+        camera = createArcRotateCamera(camera, scene, planetRadius);
+        camera.attachControl(canvas, false);
 
         createSkybox(scene);
         createBall(scene);
@@ -82,7 +65,12 @@ window.addEventListener('DOMContentLoaded', function() {
     ];
 
     function updateCameraSpeed(camera) {
-      camera.speed = (planetCenter.negate().add(camera.getFrontPosition(0)).length() - planetRadius) * 0.005;
+      const speed = (planetCenter.negate().add(camera.getFrontPosition(0)).length() - planetRadius) * 0.005;
+      camera.angularSensibilityX = Math.max(500 / speed, 1000);
+      camera.angularSensibilityY = Math.max(500 / speed, 1000);
+      camera.wheelPrecision = Math.max(3 / speed, 3);
+      camera.pinchPrecision = Math.max(3 / speed, 3);
+      camera.speed = Math.max(3 / speed, 3);
     }
 
     engine.runRenderLoop(function() {
@@ -106,7 +94,7 @@ window.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// ball to the center
+// ball to the center for debugging purposes
 function createBall(scene) {
     // center ball
     let ball = BABYLON.MeshBuilder.CreateSphere("", {diameter: 0.2}, scene);
