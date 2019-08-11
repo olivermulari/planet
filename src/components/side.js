@@ -83,6 +83,8 @@ export default class Side {
   }
 
   updateDistance(camera) {
+    // must find the closest vertex pos of mesh !
+    // because all meshes are same, the closest of four?
     const dist = BABYLON.Vector3.Distance(camera.globalPosition, this.mesh.getBoundingInfo().boundingBox.centerWorld);
     this.distance = dist;
     return dist;

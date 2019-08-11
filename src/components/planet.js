@@ -1,6 +1,19 @@
 import Side from './side';
 import { createGlass } from '../scripts/materials';
 
+
+/** WRONG NODES ARE CHECK IF MAKE CHUNCKS!!! 
+ * 
+ * New order:
+ * 
+ * 1. iterate through ALL chunks
+ * 2. until you find chunck that has to be changed
+ * 3. then change chunck mesh and stop iterating
+ * 4. check cracks!
+ * 
+*/
+
+
 export default class Planet {
   constructor(scene, position, size, resolution) {
     this.size = size; // radius
@@ -25,6 +38,7 @@ export default class Planet {
     for (let i = 1; i <= 6; i++) {
       const side = new Side(sideInfo[i], this, this.resolution);
       this.sides.push(side);
+      this.nodes.push(side);
     }
 
     this.pushSides(this.sides);
@@ -44,7 +58,7 @@ export default class Planet {
   }
 
   update() {
-    this.updateSides();
+    // this.updateSides();
     this.updateNodes();
   }
 
@@ -57,21 +71,24 @@ export default class Planet {
 
   updateNodes() {
     // update all distances but
-    const cam = this.scene.activeCamera;
-    let closestNode = this.nodes[0];
-    let closestDist = this.nodes[0].updateDistance(cam);
-    for (let i = 1; i < this.nodes.length; i++) {
-      const node = this.nodes[i];
-      if (node.isShowing) {
-        const dist = this.nodes[i].updateDistance(cam);
-        const isCloser = dist < closestDist;
-        closestNode = isCloser ? node : closestNode;
-        closestDist = isCloser ? dist : closestDist;
-      } else {
-        this.nodes.splice(i, 1);
+    if (this.nodes[0]) {
+      const cam = this.scene.activeCamera;
+      let closestNode = this.nodes[0];
+      let closestDist = this.nodes[0].updateDistance(cam);
+      for (let i = 1; i < this.nodes.length; i++) {
+        const node = this.nodes[i];
+        if (node.isShowing) {
+          const dist = this.nodes[i].updateDistance(cam);
+          const isCloser = dist < closestDist;
+          closestNode = isCloser ? node : closestNode;
+          closestDist = isCloser ? dist : closestDist;
+        } else {
+          this.nodes.splice(i, 1);
+          i--;
+        }
       }
+      // make only one set of chuncks
+      closestNode.checkIfMakeChuncks(closestDist);
     }
-    // make only one set of chuncks
-    closestNode.checkIfMakeChuncks(closestDist);
   }
 }
