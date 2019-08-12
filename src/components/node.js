@@ -76,8 +76,6 @@ export default class Node {
    * @param {(number, number, number) => [number, number, number]} calc Function that gets applied to all.
    */
   calcAllVertexPositionsOnce(calc) {
-    console.log(this.name);
-    console.log(calc);
     const p = this.mesh.getVerticesData(BABYLON.VertexBuffer.PositionKind);
     const m = this.planet.resolution;
     const n = m * 2 + 1;
@@ -93,8 +91,8 @@ export default class Node {
         if (xBorder || yBorder) {
           // handle border
         } else {
-          // block center indexes!
           if (xSide && ySide) {
+
             // data from four different blocks
             const a = ((x/2 - 1) + m * (y/2 - 1)) * 24 * 3;
             const b = ((x/2) + m * (y/2 - 1)) * 24 * 3;
@@ -110,11 +108,31 @@ export default class Node {
               d + 1 * 3,
               d + 5 * 3
             ];
+
           } else if (xSide && !ySide) {
-            
+
+            const a = ((x/2 - 1) + m * ((y+1)/2 - 1)) * 24 * 3;
+            const b = ((x/2) + m * ((y+1)/2 - 1)) * 24 * 3;
+            indexes = [
+              a + 10 * 3,
+              a + 14 * 3,
+              b + 2 * 3,
+              b + 22 * 3
+            ];
+
           } else if (!xSide && ySide) {
 
+            const a = (((x+1)/2 - 1) + m * (y/2 - 1)) * 24 * 3;
+            const b = (((x+1)/2 - 1) + m * (y/2)) * 24 * 3;
+            indexes = [
+              a + 16 * 3,
+              a + 20 * 3,
+              b + 4 * 3,
+              b + 8 * 3
+            ];
+
           } else if (!xSide && !ySide) {
+
             // center point from a block
             const a = (((x+1)/2 - 1) + m * ((y+1)/2 - 1)) * 24 * 3;
             indexes = [
@@ -127,6 +145,7 @@ export default class Node {
               a + 18 * 3,
               a + 21 * 3
             ];
+            
           }
         }
 
