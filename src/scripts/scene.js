@@ -8,8 +8,7 @@ import { createMetal, createPlastic } from "./materials";
 import { createBall } from "../utils/debugball";
 
 const resolution = 4; // 32 is a good standard even 6 is working
-const smallestPart = 0.05;
-const planetRadius = 20;
+const planetRadius = 10;
 const planetCenter = new BABYLON.Vector3(0, 0, 0);
 
 export function createScene() {

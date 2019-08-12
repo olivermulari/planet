@@ -28,7 +28,7 @@ export default class Planet {
 
   createSides() {
     const sides = [
-      ["Up",    this.position.add(new Vector3(0, this.size/2, 0))], 
+      ["Up",    this.position.add(new Vector3(0, this.size/2, 0))],
       ["Down",  this.position.add(new Vector3(0, -this.size/2, 0))], 
       ["Front", this.position.add(new Vector3(0, 0, -this.size/2))], 
       ["Back",  this.position.add(new Vector3(0, 0, this.size/2))],

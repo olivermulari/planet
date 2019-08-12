@@ -11,7 +11,7 @@ export default class Node {
     this.planet = planet;
     this.mesh = this.createMesh();
     this.corners = this.getCorners(this.mesh, this.planet.resolution);
-    this.calcAllVertexPositionsOnce(this.figureCalcFunction());
+    this.calcAllVertexPositionsOnce(this.round);//this.figureCalcFunction());
   }
 
   createMesh() {
@@ -48,6 +48,18 @@ export default class Node {
     this.corners.forEach(c => {createBall(c, this.planet.scene);});
   }
 
+  round(x, y, z, size) {
+    // Cube mapping formula by Philip Nowell
+    const x2 =  x * x / (size * size / 4);
+    const y2 =  y * y / (size * size / 4);
+    const z2 =  z * z / (size * size / 4);
+    return [
+      size/2 * x * Math.sqrt(1 - y2 / 2 - z2 / 2 + y2 * z2 / 3),
+      size/2 * y * Math.sqrt(1 - z2 / 2 - x2 / 2 + z2 * x2 / 3),
+      size/2 * z * Math.sqrt(1 - x2 / 2 - y2 / 2 + x2 * y2 / 3),
+    ];
+  }
+
   // returns a function depending on node name
   figureCalcFunction() {
     const a = 2;
@@ -80,19 +92,124 @@ export default class Node {
     const m = this.planet.resolution;
     const n = m * 2 + 1;
     // indexes
-    for (let y = 0; y < n - 1; y++) {
-      for (let x = 0; x < n - 1; x++) {
+    for (let y = 0; y < n; y++) {
+      for (let x = 0; x < n; x++) {
         // Array for all same points
         let indexes = [];
-        const xBorder = x == 0 || x == n;
-        const yBorder = y == 0 || y == n;
+        const xBorder = x == 0 || x == n - 1;
+        const yBorder = y == 0 || y == n - 1;
         const xSide = x % 2 == 0;
         const ySide = y % 2 == 0;
         if (xBorder || yBorder) {
-          // handle border
+          // border cases require special care
+          if (xBorder && yBorder) {
+            // corner-cases
+            if (x == 0 && y == 0) {
+              indexes = [
+                3,
+                5 * 3
+              ];
+            } else if (x == n - 1 && y == 0) {
+              const a = (m - 1) * 24 * 3;
+              indexes = [
+                a + 7 * 3,
+                a + 11 * 3
+              ];
+            } else if (x == 0 && y == n - 1) {
+              const a = m * (m - 1) * 24 * 3;
+              indexes = [
+                a + 19 * 3,
+                a + 23 * 3
+              ];
+            } else { // if (x == n-2 && y == n-2)
+              const a = ((m - 1) + m * (m - 1)) * 24 * 3;
+              indexes = [
+                a + 13 * 3,
+                a + 17 * 3
+              ];
+            }
+
+          } else if (xBorder && !yBorder) {
+            // side-case
+            if (x == 0) {
+              if (ySide) {
+                const a = m * (y/2 - 1) * 24 * 3;
+                const b = m * (y/2) * 24 * 3;
+                indexes = [
+                  a + 19 * 3,
+                  a + 23 * 3,
+                  b + 1 * 3,
+                  b + 5 * 3
+                ];
+              } else {
+                const a = m * ((y+1)/2 - 1) * 24 * 3;
+                indexes = [
+                  a + 2 * 3,
+                  a + 22 * 3
+                ];
+              }
+              
+            } else { // if (x == n-2) {
+              if (ySide) {
+                const a = ((m - 1) + m * (y/2 - 1)) * 24 * 3;
+                const b = ((m - 1) + m * (y/2)) * 24 * 3;
+                indexes = [
+                  a + 13 * 3,
+                  a + 17 * 3,
+                  b + 7 * 3,
+                  b + 11 * 3
+                ];
+              } else {
+                const a =((m - 1) + m * ((y+1)/2 - 1)) * 24 * 3;
+                indexes = [
+                  a + 10 * 3,
+                  a + 14 * 3
+                ];
+
+              }
+            }
+
+          } else { // if (!xBorder && yBorder) {
+            // bottom-side-case
+            if (y == 0) {
+              if (xSide) {
+                const a = (x/2 - 1) * 24 * 3;
+                const b = (x/2) * 24 * 3;
+                indexes = [
+                  a + 7 * 3,
+                  a + 11 * 3,
+                  b + 1 * 3,
+                  b + 5 * 3
+                ];
+              } else {
+                const a = ((x+1)/2 - 1) * 24 * 3;
+                indexes = [
+                  a + 4 * 3,
+                  a + 8 * 3
+                ];
+              }
+            } else { // if (y == n-2) {
+              if (xSide) {
+                const a = ((x/2 - 1) + m * (m - 1)) * 24 * 3;
+                const b = ((x/2) + m * (m - 1)) * 24 * 3;
+                indexes = [
+                  a + 13 * 3,
+                  a + 17 * 3,
+                  b + 19 * 3,
+                  b + 23 * 3
+                ];
+              } else {
+                const a = (((x+1)/2 - 1) + m * (m - 1)) * 24 * 3;
+                indexes = [
+                  a + 16 * 3,
+                  a + 20 * 3
+                ];
+              }
+            }
+          }
+
         } else {
           if (xSide && ySide) {
-
             // data from four different blocks
             const a = ((x/2 - 1) + m * (y/2 - 1)) * 24 * 3;
             const b = ((x/2) + m * (y/2 - 1)) * 24 * 3;
@@ -110,7 +227,6 @@ export default class Node {
             ];
 
           } else if (xSide && !ySide) {
-
             const a = ((x/2 - 1) + m * ((y+1)/2 - 1)) * 24 * 3;
             const b = ((x/2) + m * ((y+1)/2 - 1)) * 24 * 3;
             indexes = [
@@ -121,7 +237,6 @@ export default class Node {
             ];
 
           } else if (!xSide && ySide) {
-
             const a = (((x+1)/2 - 1) + m * (y/2 - 1)) * 24 * 3;
             const b = (((x+1)/2 - 1) + m * (y/2)) * 24 * 3;
             indexes = [
@@ -131,8 +246,7 @@ export default class Node {
               b + 8 * 3
             ];
 
-          } else if (!xSide && !ySide) {
-
+          } else { // if (!xSide && !ySide) {
             // center point from a block
             const a = (((x+1)/2 - 1) + m * ((y+1)/2 - 1)) * 24 * 3;
             indexes = [
@@ -145,13 +259,13 @@ export default class Node {
               a + 18 * 3,
               a + 21 * 3
             ];
-            
+
           }
         }
 
         // calculte first element and apply foreach
         const f = indexes[0];
-        const res = calc(p[f], p[f+1], p[f+2]); // returns [] of new values
+        const res = calc(p[f], p[f+1], p[f+2], this.size); // returns [] of new values
         indexes.forEach((i) => {
           p[i] = res[0];
           p[i+1] = res[1];
