@@ -11,7 +11,7 @@ export default class Node {
     this.planet = planet;
     this.mesh = this.createMesh();
     this.corners = this.getCorners(this.mesh, this.planet.resolution);
-    this.calcAllVertexPositionsOnce(this.calc());
+    this.calcAllVertexPositionsOnce(this.figureCalcFunction());
   }
 
   createMesh() {
@@ -21,7 +21,7 @@ export default class Node {
   }
 
   /**
-   * Gets the corner vertexes of the mesh
+   * Gets the corner vertices of the mesh
    * 
    * @param {*} mesh 
    * @param {number} resolution 
