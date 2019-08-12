@@ -1,7 +1,7 @@
 import Chunck from './chunck';
 
 // how many times to distance
-const sharpenRatio = 8;
+const sharpenRatio = 4;
 
 export default class Side {
   constructor(info, planet, resolution) {
@@ -15,8 +15,10 @@ export default class Side {
     this.rotY = info.rotY;
     this.size = ((1.0 / Math.sqrt(3)) * this.planet.size) * 2.0;
     this.mesh = null;
+    this.distance = null;
     this.roundingVector = new BABYLON.Vector3(0, 1.0, 0).scale(this.size / 2.0); // assistent of rounding vertex data
     this.material = this.planet.material;
+    this.isShowing = true;
     this.resolution = resolution;
     this.chuncks = [];
     this.create(info);
@@ -52,7 +54,7 @@ export default class Side {
             y: y * Math.sqrt(1 - (Math.pow(z, 2) / 2) - (Math.pow(x, 2) / 2) + ((Math.pow(z, 2) * Math.pow(x, 2)) / 3)),
             z: z * Math.sqrt(1 - (Math.pow(x, 2) / 2) - (Math.pow(y, 2) / 2) + ((Math.pow(x, 2) * Math.pow(y, 2)) / 3))
           }
-          */
+      */
       positions[i*3] = v.x;
       positions[i*3+1] = v.y;
       positions[i*3+2] = v.z;
@@ -60,7 +62,7 @@ export default class Side {
     mesh.updateVerticesData(BABYLON.VertexBuffer.PositionKind, positions);
 
     // working!! makes a box around object
-    mesh.refreshBoundingInfo(true);    
+    mesh.refreshBoundingInfo(true);
   }
 
   calculateNormals(mesh) {
@@ -80,43 +82,21 @@ export default class Side {
     mesh.updateVerticesData(BABYLON.VertexBuffer.NormalKind, normals);
   }
 
-  /*
-  update() {
-      this.checkIfShowChucks()
-      if (this.showChuncks) {
-          if (this.chuncks.length <= 0) {
-              this.makeChuncks();
-          } else {
-              this.chuncks.forEach((chunck) => {
-                  chunck.update();
-              });
-          }
-          this.mesh.setEnabled(false);
-      } else {
-          this.chuncks.forEach((chunck) => { chunck.mesh.dispose(); });
-          this.mesh.setEnabled(true);
-          this.chuncks = [];
-      }
+  updateDistance(camera) {
+    // must find the closest vertex pos of mesh !
+    // because all meshes are same, the closest of four?
+    const dist = BABYLON.Vector3.Distance(camera.globalPosition, this.mesh.getBoundingInfo().boundingBox.centerWorld);
+    this.distance = dist;
+    return dist;
   }
-  */
 
-  checkIfMakeChuncks(dist) {
-    if (dist < sharpenRatio * this.size) {
+  checkIfMakeChuncks() {
+    if (this.distance < sharpenRatio * this.size) {
       this.makeChuncks();
       this.mesh.setEnabled(false);
       return true;
     } else {
       this.disposeChuncks();
-      return false;
-    }
-  }
-
-  // not in use
-  checkIfDisposeChuncks(dist) {
-    if (dist >= sharpenRatio * this.size) {
-      this.disposeChuncks();
-      return true;
-    } else {
       return false;
     }
   }
@@ -142,16 +122,19 @@ export default class Side {
     for (let i = 1; i <= 4; i++) {
       const chunck = new Chunck(`${this.name}_Chunck${i}`, this, this, this.planet.scene.glassMaterials[i - 1], relativePositions[i]);
       this.chuncks.push(chunck);
+      this.planet.nodes.push(chunck);
     }
+    this.isShowing = false;
   }
 
   disposeChuncks() {
     this.chuncks.forEach((chunck) => {
       chunck.disposeChuncks();
-      chunck.mesh.dispose(); 
+      chunck.mesh.dispose();
     });
     this.chuncks = [];
     this.mesh.setEnabled(true);
+    this.isShowing = true;
   }
 
   isSide() {

@@ -1,15 +1,24 @@
 import { ArcRotateCamera } from "@babylonjs/core/Cameras/arcRotateCamera";
 import { Vector3 } from "@babylonjs/core/Maths/math";
 
-export function createArcRotateCamera(camera, scene, planetRadius) {
+export function createArcRotateCamera(scene, planetRadius) {
   // Creates, angles, distances and targets the camera
-  camera = new ArcRotateCamera("Camera", 0, 0, 0, new Vector3(0, 0, 0), scene);
+  const camera = new ArcRotateCamera("Camera", 0, 0, 0, new Vector3(0, 0, 0), scene);
   camera.setPosition(new Vector3(0, 40, -170));
   camera.allowUpsideDown = false;
   camera.lowerRadiusLimit = planetRadius + 2;
-  camera.angularSensibilityX = 500;
-  camera.angularSensibilityy = 500;
+  camera.angularSensibilityX = 2000;
+  camera.angularSensibilityy = 2000;
   return camera;
+}
+
+export function updateCameraSpeed(camera) {
+  const speed = (planetCenter.negate().add(camera.getFrontPosition(0)).length() - planetRadius) * 0.005;
+  camera.angularSensibilityX = Math.max(500 / speed, 1000);
+  camera.angularSensibilityY = Math.max(500 / speed, 1000);
+  camera.wheelPrecision = Math.max(3 / speed, 3);
+  camera.pinchPrecision = Math.max(3 / speed, 3);
+  camera.speed = Math.max(3 / speed, 3);
 }
 
 /*

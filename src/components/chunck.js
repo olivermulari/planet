@@ -1,5 +1,5 @@
 // how many times to distance
-const sharpenRatio = 8;
+const sharpenRatio = 4;
 
 export default class Chunck {
   constructor(name, side, parent, material, relPos) {
@@ -14,7 +14,10 @@ export default class Chunck {
     this.rotY = parent.rotY;
     this.relativePosition = relPos;
     this.size = parent.size / 2;
+    this.mesh = null;
+    this.distance = null;
     this.material = material;
+    this.isShowing = true;
     this.chuncks = [];
     this.create();
   }
@@ -27,6 +30,7 @@ export default class Chunck {
     this.moveVertexData(this.mesh);
     this.mesh.chunck = this;
 
+    // methods in side-class
     this.side.round(this.mesh);
     this.side.calculateNormals(this.mesh);
   }
@@ -43,36 +47,11 @@ export default class Chunck {
     mesh.updateVerticesData(BABYLON.VertexBuffer.PositionKind, positions);
   }
 
-  /*
-  update() {
-      if (this.size / this.planet.resolution > smallestPart) {
-          this.checkIfShowChucks()
-          if (this.showChuncks) {
-              if (this.chuncks.length <= 0) {
-                  this.makeChuncks();
-              } else {
-                  this.chuncks.forEach((chunck) => {
-                      chunck.update();
-                  });
-              }
-              this.mesh.setEnabled(false);
-          } else {
-              this.chuncks.forEach((chunck) => { chunck.mesh.dispose(); });
-              this.mesh.setEnabled(true);
-              this.chuncks = [];
-          }
-      }
+  updateDistance(camera) {
+    const dist = BABYLON.Vector3.Distance(camera.globalPosition, this.mesh.getBoundingInfo().boundingBox.centerWorld);
+    this.distance = dist;
+    return dist;
   }
-
-  checkIfShowChucks() {
-      const d = this.planet.scene.activeCamera.globalPosition;
-      if (BABYLON.Vector3.Distance(d, this.mesh.position) < this.size * 6) {
-          this.showChuncks = true;
-      } else {
-          this.showChuncks = false;
-      }
-  }
-  */
 
   checkIfMakeChuncks(dist) {
     if (dist < sharpenRatio * this.size) {
@@ -80,17 +59,6 @@ export default class Chunck {
       this.mesh.setEnabled(false);
       return true;
     } else if (dist > sharpenRatio * this.parent.size) {
-      this.parent.disposeChuncks();
-      this.parent.checkIfMakeChuncks(dist);
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  // not in use
-  checkIfDisposeChuncks(dist) {
-    if (dist > sharpenRatio * this.parent.size) {
       this.parent.disposeChuncks();
       this.parent.checkIfMakeChuncks(dist);
       return true;
@@ -120,7 +88,9 @@ export default class Chunck {
     for (let i = 1; i <= 4; i++) {
       const chunck = new Chunck(`${this.name}_Chunck${i}`, this.side, this, this.planet.scene.glassMaterials[i - 1], relativePositions[i]);
       this.chuncks.push(chunck);
+      this.planet.nodes.push(chunck);
     }
+    this.isShowing = false;
   }
 
   disposeChuncks() {
@@ -130,6 +100,7 @@ export default class Chunck {
     });
     this.chuncks = [];
     this.mesh.setEnabled(true);
+    this.isShowing = true;
   }
 
   isSide() {

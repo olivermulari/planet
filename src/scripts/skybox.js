@@ -1,3 +1,5 @@
+import * as BABYLON from "@babylonjs/core/Legacy/legacy";
+
 export function createSkybox(scene) {
   // Environment Texture
   var hdrTexture = BABYLON.CubeTexture.CreateFromPrefilteredData("https://assets.babylonjs.com/environments/environmentSpecular.env", scene);
