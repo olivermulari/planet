@@ -67,7 +67,8 @@ export default class Node {
   /**
    * Generates a function according to sphere radius
    * @param {number} radius
-   * @param {Vector3}
+   * @param {Vector3} pos
+   * @returns {(number, number, number) => [number, number, number]} function that modifies points
    */
   figureRoundFunc(radius, pos) {
     // Small optimisation available if pos = 0, 0, 0
@@ -76,19 +77,15 @@ export default class Node {
       const x2 =  Math.pow((x - pos.x) / radius, 2);
       const y2 =  Math.pow((y - pos.y) / radius, 2);
       const z2 =  Math.pow((z - pos.z) / radius, 2);
-
-      // Coordinates in sphere
       const spX = (x - pos.x) * Math.sqrt(1 - y2 / 2 - z2 / 2 + y2 * z2 / 3);
       const spY = (y - pos.y) * Math.sqrt(1 - z2 / 2 - x2 / 2 + z2 * x2 / 3);
       const spZ = (z - pos.z) * Math.sqrt(1 - x2 / 2 - y2 / 2 + x2 * y2 / 3);
-
       // every distance is radius!
       return [pos.x + spX, pos.y + spY, pos.z + spZ];
     };
     return roundFunc;
   }
   
-
   // returns a function depending on node name
   figureCalcFunction() {
     const a = 2;
