@@ -30,6 +30,10 @@ export function addDebugKeycodes(scene) {
           scene.debugLayer.show();
         }
         break;
+      case "S":
+      case "s":
+        scene.updatePlanet = !scene.updatePlanet;
+        break;
       }
       break;
     }

@@ -20,6 +20,9 @@ export default class Planet {
     this.nodes = [];
     this.queue = [];
     this.createSides();
+
+    // for keykodes
+    this.scene.updatePlanet = true;
   }
 
   createSides() {
@@ -38,7 +41,9 @@ export default class Planet {
   }
 
   update() {
-    this.updateQueue();
+    if (this.scene.updatePlanet) {
+      this.updateQueue();
+    }
   }
 
   /**
