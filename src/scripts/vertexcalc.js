@@ -7,9 +7,9 @@
 * @param {(number, number, number) => [number, number, number]} calc Function that gets applied to all.
 * @return {number[]} vertexData
 */
-export function calcAllVertexPositionsOnce(mesh, calc, planet) {
+export function calcAllVertexPositionsOnce(mesh, calc, resolution) {
   const p = mesh.getVerticesData(BABYLON.VertexBuffer.PositionKind);
-  const m = planet.resolution;
+  const m = resolution;
   const n = m * 2 + 1;
   // indexes
   for (let y = 0; y < n; y++) {
@@ -185,7 +185,7 @@ export function calcAllVertexPositionsOnce(mesh, calc, planet) {
 
       // calculte first element and apply foreach
       const f = indexes[0];
-      const res = calc(p[f], p[f+1], p[f+2], planet.size); // returns [] of new values
+      const res = calc(p[f], p[f+1], p[f+2]); // returns [] of new values
       indexes.forEach((i) => {
         p[i] = res[0];
         p[i+1] = res[1];
