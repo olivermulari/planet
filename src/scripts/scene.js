@@ -3,7 +3,7 @@ import * as BABYLON from "@babylonjs/core/Legacy/legacy";
 
 import { createSkybox } from "./skybox";
 import { createArcRotateCamera, updateCameraSpeed } from "./camera";
-import { createMetal, createPlastic } from "./materials";
+import { addMaterialsToScene } from "./materials";
 
 import { createBall } from "../utils/debugball";
 
@@ -25,21 +25,14 @@ export function createScene() {
 
   createSkybox(scene);
   createBall(planetCenter, scene);
+  scene.planet = new Planet(scene, planetCenter, planetRadius, resolution);
 
   // materials
-  scene.glassMaterials = [
-    createMetal(scene, new BABYLON.Color3(1.0, 0.1, 0.1)),
-    createPlastic(scene, new BABYLON.Color3(0.3, 1.0, 0.3)),
-    createPlastic(scene, new BABYLON.Color3(0.3, 1.0, 1.0)),
-    createMetal(scene, new BABYLON.Color3(0.3, 0.2, 1.0)),
-  ];
-  
-  scene.planet = new Planet(scene, planetCenter, planetRadius, resolution);
-  scene.planet.createSides();
+  addMaterialsToScene(scene);
 
   // render loop
   scene.registerBeforeRender(function() {
-    // scene.planet.update();
+    scene.planet.update();
     // updateCameraSpeed(camera);
   });
 

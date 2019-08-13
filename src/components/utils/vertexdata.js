@@ -1,4 +1,4 @@
-import { Mesh, VertexData, Vector3 } from "@babylonjs/core";
+import { VertexData, Vector3 } from "@babylonjs/core";
 
 /**
  * Generates a single plane with resolution options
@@ -11,11 +11,9 @@ import { Mesh, VertexData, Vector3 } from "@babylonjs/core";
  * @returns {BABYLON.Mesh} customMesh
  */
 
-export function generatePlaneMesh(direction, position, size, resolution, scene) {
+export function generateVertexData(direction, position, size, resolution) {
   const amountOfBlocks = Math.pow(resolution, 2);
   const blockSize = size / resolution;
-
-  const customMesh = new Mesh("", scene);
   const indices = Array.from(Array(amountOfBlocks * 24).keys());
 
   let generateVertexData;
@@ -43,9 +41,7 @@ export function generatePlaneMesh(direction, position, size, resolution, scene) 
   const vertexData = new VertexData();
   vertexData.positions = generateVertexData(position, size, blockSize, resolution);
   vertexData.indices = indices;
-  vertexData.applyToMesh(customMesh, true);
-
-  return customMesh;
+  return vertexData;
 }
 
 // Repeat beacuse all sides require different 2-dim array configurations

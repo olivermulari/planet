@@ -4,7 +4,7 @@ import { Vector3 } from "@babylonjs/core/Maths/math";
 export function createArcRotateCamera(scene, planetRadius) {
   // Creates, angles, distances and targets the camera
   const camera = new ArcRotateCamera("Camera", 0, 0, 0, new Vector3(0, 0, 0), scene);
-  camera.setPosition(new Vector3(0, 40, -170));
+  camera.setPosition(new Vector3(0, 40, -300));
   camera.allowUpsideDown = false;
   camera.lowerRadiusLimit = planetRadius + 2;
   camera.angularSensibilityX = 2000;

@@ -1,18 +1,31 @@
-import { generatePlaneMesh } from "../scripts/mesh";
-import { Vector3 } from "@babylonjs/core";
+import { Vector3, Mesh } from "@babylonjs/core";
 
-import { calcAllVertexPositionsOnce } from "../scripts/vertexcalc";
-
-import { createBall } from "../utils/debugball";
+import { generateVertexData } from "./utils/vertexdata";
+import { calcAllVertexPositionsOnce } from "./utils/vertexcalc";
+import { figureNodePosFunc } from "./utils/nodepos";
+import { getMaterialByID } from "./utils/materials";
 
 export default class Node {
-  constructor(name, position, size, planet) {
+  constructor(name, position, size, planet, id) {
     this.name = name;
     this.position = position;
     this.size = size;
     this.planet = planet;
-    this.mesh; 
+    this.isSide = size === this.planet.radius * 2;
+    this.mesh;
     this.corners;
+    this.distance;
+    this.isVisible = true;
+    this.nodes = [];
+
+    // hacky colors
+    this.id = id || -1;
+    this.material = this.id == -1 ? this.planet.material : getMaterialByID(this.planet.scene, id);
+
+    // constants for node recursion
+    this.minNodeSize = 0.5;
+    this.nodeUpdateDistance = Math.pow(this.size, 1.5);
+
     this.onCreate();
   }
 
@@ -20,18 +33,28 @@ export default class Node {
     this.mesh = this.generateMesh();
     this.mapCubeToShere();
     this.corners = this.getCorners(this.mesh, this.planet.resolution);
-    console.log(this.corners);
+  }
+
+  /**
+   * Sets the distance from the closest corner
+   * @param {*} camera 
+   */
+  setDistance(camera) {
+    const pos = camera.globalPosition;
+    this.distance = this.corners.map(c => BABYLON.Vector3.Distance(c, pos))
+      .reduce((l, r) => l < r ? l : r);
   }
 
   generateMesh() {
-    const mesh = generatePlaneMesh(this.name, this.position, this.size, this.planet.resolution, this.planet.scene);
-    mesh.material = this.planet.material;
-    return mesh;
+    const customMesh = new Mesh("", this.planet.scene);
+    const vertexData = generateVertexData(this.name, this.position, this.size, this.planet.resolution, this.planet.scene);
+    vertexData.applyToMesh(customMesh, true);
+    customMesh.material = this.material;
+    return customMesh;
   }
 
   /**
    * Gets the corner vertices of the mesh
-   * 
    * @param {*} mesh 
    * @param {number} resolution 
    */
@@ -51,10 +74,6 @@ export default class Node {
       return new Vector3(x, y, z);
     });
     return corners;
-  }
-
-  drawCorners() {
-    this.corners.forEach(c => {createBall(c, this.planet.scene);});
   }
 
   mapCubeToShere() {
@@ -85,23 +104,48 @@ export default class Node {
     };
     return roundFunc;
   }
-  
-  // returns a function depending on node name
-  figureCalcFunction() {
-    const a = 2;
-    switch(this.name) {
-    case "Front":
-      return (x, y, z) => [x, y, z-a];
-    case "Back":
-      return (x, y, z) => [x, y, z+a];
-    case "Up":
-      return (x, y, z) => [x, y+a, z];
-    case "Down":
-      return (x, y, z) => [x, y-a, z];
-    case "Right":
-      return (x, y, z) => [x+a, y, z];
-    case "Left":
-      return (x, y, z) => [x-a, y, z];
+
+  checkIfUpdates() {
+    const generated = this.checkIfGenerateNodes();
+    const disposed = this.checkIfDisposeNodes();
+    return generated || disposed;
+  }
+
+  checkIfGenerateNodes() {
+    if (this.isVisible && this.size > this.minNodeSize) {
+      if (this.distance < this.nodeUpdateDistance) {
+        [1, 2, 3, 4].map(figureNodePosFunc(this.name, this.position, this.size))
+          .forEach((pos, i) => {
+            const node = new Node(this.name, pos, this.size/2, this.planet, i);
+            this.nodes.push(node);
+            this.planet.nodes.push(node);
+          });
+        this.mesh.setEnabled(false);
+        this.isVisible = false;
+        return true;
+      }
+    } else {
+      return false;
+    }  
+  }
+
+  checkIfDisposeNodes() {
+    if (!this.isVisible && this.distance > this.nodeUpdateDistance) {
+      this.disposeNodes();
+      return true;
+    } else {
+      return false;
     }
   }
+
+  disposeNodes() {
+    this.nodes.forEach(node => {
+      node.disposeNodes();
+      node.mesh.dispose();
+    });
+    this.nodes = [];
+    this.mesh.setEnabled(true);
+    this.isVisible = true;
+  }
+
 }
