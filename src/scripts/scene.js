@@ -8,7 +8,7 @@ import { addMaterialsToScene } from "./materials";
 import { createBall } from "../utils/debugball";
 
 const resolution = 8;
-const planetRadius = 20;
+const planetRadius = 200;
 const planetCenter = new BABYLON.Vector3(0, 0, 0);
 
 export function createScene() {
