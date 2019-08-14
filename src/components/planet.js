@@ -92,8 +92,6 @@ export default class Planet {
     if (this.disposeQueue.length > 0) {
       this.disposeQueue.shift().checkIfDisposeNodes();
     }
-
-    console.log(this.disposeQueue.length);
   }
 
   makeQueuesFromNodes(nodes) {

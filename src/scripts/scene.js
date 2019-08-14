@@ -5,9 +5,10 @@ import { createSkybox } from "./skybox";
 import { createArcRotateCamera, updateCameraSpeed } from "./camera";
 import { addMaterialsToScene } from "./materials";
 
+import * as MobileCheck from "../utils/mobile";
 import { createBall } from "../utils/debugball";
 
-const resolution = 8;
+const resolution = MobileCheck.isMobile.any() ? 4 : 8;
 const planetRadius = 200;
 const planetCenter = new BABYLON.Vector3(0, 0, 0);
 
