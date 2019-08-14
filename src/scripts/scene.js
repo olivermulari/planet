@@ -7,7 +7,7 @@ import { addMaterialsToScene } from "./materials";
 
 import { createBall } from "../utils/debugball";
 
-const resolution = 4; // 32 is a good standard even 6 is working
+const resolution = 8;
 const planetRadius = 20;
 const planetCenter = new BABYLON.Vector3(0, 0, 0);
 

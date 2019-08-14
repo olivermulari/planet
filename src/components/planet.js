@@ -2,6 +2,7 @@ import { Vector3 } from '@babylonjs/core';
 
 import Node from './node';
 import { createGlass } from '../scripts/materials';
+import Perlin from './utils/perlin';
 
 /**
  * TODO: way to handle unEnabled nodes
@@ -19,10 +20,19 @@ export default class Planet {
     this.material = createGlass(scene, new BABYLON.Color3(0.3, 0.2, 1.0));
     this.nodes = [];
     this.queue = [];
-    this.createSides();
+    this.disposeQueue = [];
 
     // for keykodes
     this.scene.updatePlanet = true;
+
+    // terrain generation object
+    this.perlin = new Perlin();
+
+    this.onCreate();
+  }
+
+  onCreate() {
+    this.createSides();
   }
 
   createSides() {
@@ -50,6 +60,7 @@ export default class Planet {
    * Updates queue so that closest nodes are updated first
    * Rules:
    * 1. If queue is empty set active nodes to the queue, closest first
+   * 1.1 dispose the one that can be
    * 2. Else go through queue and check if a node can be updated
    * 3. If node can't be updated, move to the next node
    * 4. If node can be updated 
@@ -60,7 +71,9 @@ export default class Planet {
    */
   updateQueue() {
     if (this.queue.length == 0) {
-      this.queue = this.makeQueueFromNodes(this.nodes);
+      this.queue = this.makeQueuesFromNodes(this.nodes);
+      // organize disposeQueue
+      this.disposeQueue.sort((l, r) => l.distance - r.distance);
     } else {
       let current;
       let updated = false; 
@@ -72,11 +85,21 @@ export default class Planet {
         this.queue = this.insertNodesToQueue(current.nodes, this.queue);
       }
     }
+    // dispose one in the dispose queue
+    if (this.disposeQueue.length > 0) {
+      this.disposeQueue.shift().disposeNodes();
+    }
   }
 
-  makeQueueFromNodes(nodes) {
+  makeQueuesFromNodes(nodes) {
     this.setDistances(nodes);
-    const copy = Array.from(nodes);
+    const copy = nodes.filter(node => {
+      const term = node.isVisible;
+      if (!term) {
+        this.disposeQueue.push(node);
+        return false;
+      } return true;
+    });
     copy.sort((l, r) => l.distance - r.distance);
     return copy;
   }
@@ -108,6 +131,7 @@ export default class Planet {
   setDistances(nodes) {
     nodes.forEach(node => {
       node.setDistance(this.scene.activeCamera);
+      node.setIsVisible(this.scene.activeCamera);
     });
   }
 }
