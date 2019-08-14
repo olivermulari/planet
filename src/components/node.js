@@ -1,4 +1,4 @@
-import { Vector3, Mesh } from "@babylonjs/core";
+import { Vector3, Mesh, AbstractMesh } from "@babylonjs/core";
 
 import { generateVertexData } from "./utils/vertexdata";
 import { calcAllVertexPositionsOnce } from "./utils/vertexcalc";
@@ -21,8 +21,9 @@ export default class Node {
     this.corners;
     this.distance;
     this.isVisible = false; //visible to camera
+    this.isInFrustum = false;
     this.isActive = true;
-    this.nodes = [];
+    this.nodes = null; // []
 
     // hacky colors
     this.id = id || -1;
@@ -30,13 +31,15 @@ export default class Node {
 
     // constants for node recursion
     this.minNodeSize = 1;
-    this.nodeUpdateDistance = Math.pow(this.size, 1.5);
+    this.nodeUpdateDistance = Math.pow(this.size, 1.25);
 
-    // terrain options
+    /**
+     * Terrain generation options:
+     */
     this.generateTerrain = true;
-    this.perlinMult = 0.4;
-    this.perlinOff = 25; // brakes if under 20
-    this.perlinThreshold = 0.05;
+    this.perlinFreq = 8 / this.planet.radius;
+    this.perlinDir = 1.25 * this.planet.radius;
+    this.perlinAmp = 0.05;
 
     this.onCreate();
   }
@@ -62,7 +65,12 @@ export default class Node {
    */
   setIsVisible(camera) {
     const pos = camera.globalPosition;
+    this.isInFrustum = camera.isInFrustum(this.mesh);
     this.isVisible = this.distance < BABYLON.Vector3.Distance(this.planet.position, pos);
+  }
+
+  isRenderable() {
+    return this.isVisible && this.isInFrustum;
   }
 
   generateMesh() {
@@ -70,6 +78,7 @@ export default class Node {
     const vertexData = generateVertexData(this.name, this.position, this.size, this.planet.resolution, this.planet.scene);
     vertexData.applyToMesh(customMesh, true);
     customMesh.material = this.material;
+    customMesh.cullingStrategy = AbstractMesh.CULLINGSTRATEGY_BOUNDINGSPHERE_ONLY;
     return customMesh;
   }
 
@@ -122,13 +131,13 @@ export default class Node {
       let spZ = (z - pos.z) * Math.sqrt(1 - x2 / 2 - y2 / 2 + x2 * y2 / 3);
 
       if (this.generateTerrain) {
-        const x = (spX + this.perlinOff) * this.perlinMult;
-        const y = (spY + this.perlinOff) * this.perlinMult;
-        const z = (spZ + this.perlinOff) * this.perlinMult;
-        const noise = this.perlinThreshold * this.planet.perlin.noise(x, y, z);
-        spX *= 1 + noise;
-        spY *= 1 + noise;
-        spZ *= 1 + noise;
+        const x = (spX + this.perlinDir) * this.perlinFreq;
+        const y = (spY + this.perlinDir) * this.perlinFreq;
+        const z = (spZ + this.perlinDir) * this.perlinFreq;
+        const noise = 1 + this.perlinAmp * this.planet.perlin.noise(x, y, z);
+        spX *= noise;
+        spY *= noise;
+        spZ *= noise;
       }
       return [pos.x + spX, pos.y + spY, pos.z + spZ];
     };
@@ -144,12 +153,13 @@ export default class Node {
   checkIfGenerateNodes() {
     if (this.isActive && this.size > this.minNodeSize) {
       if (this.distance < this.nodeUpdateDistance) {
-        [1, 2, 3, 4].map(figureNodePosFunc(this.name, this.position, this.size))
-          .forEach((pos, i) => {
+        const arr = [1, 2, 3, 4].map(figureNodePosFunc(this.name, this.position, this.size))
+          .map((pos, i) => {
             const node = new Node(this.name, pos, this.size/2, this.planet, i);
-            this.nodes.push(node);
             this.planet.nodes.push(node);
+            return node;
           });
+        this.nodes = arr;
         this.mesh.setEnabled(false);
         this.isActive = false;
         return true;
@@ -169,13 +179,25 @@ export default class Node {
   }
 
   disposeNodes() {
-    this.nodes.forEach(node => {
-      node.disposeNodes();
-      node.mesh.dispose();
-    });
-    this.nodes = [];
-    this.mesh.setEnabled(true);
-    this.isActive = true;
+    if (this.nodes) {
+      this.nodes.forEach(node => {
+        node.disposeNodes();
+        node.mesh.dispose();
+        this.removeNodeFromNodesArray(node);
+      });
+      this.nodes = null;
+      this.mesh.setEnabled(true);
+      this.isActive = true;
+    }
+  }
+
+  /**
+   * Removes element from planet nodes and from main loop
+   * @param {Node} node 
+   */
+  removeNodeFromNodesArray(node) {
+    const arr = this.planet.nodes;
+    arr.splice(arr.indexOf(node), 1);
   }
 
 }

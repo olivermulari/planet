@@ -9,7 +9,8 @@ import Perlin from './utils/perlin';
  * 1. a separate dispose array for inactive nodes that check every once in a while
  *    are there any chuncks to dispose -> furthest first
  * 2. dispose loop?
- * 3. update queue more often when there is strong movements? 
+ * 3. update queue more often when there is strong movements?
+ * 4. implement advanced pooling instead of disposing nodes?
 */
 export default class Planet {
   constructor(scene, position, size, resolution) {
@@ -71,9 +72,8 @@ export default class Planet {
    */
   updateQueue() {
     if (this.queue.length == 0) {
+      this.disposeAllInQueue();
       this.queue = this.makeQueuesFromNodes(this.nodes);
-      // organize disposeQueue
-      this.disposeQueue.sort((l, r) => l.distance - r.distance);
     } else {
       let current;
       let updated = false; 
@@ -82,25 +82,31 @@ export default class Planet {
         updated = current.checkIfUpdates();
       }
       if (updated) {
-        this.queue = this.insertNodesToQueue(current.nodes, this.queue);
+        // if nodes disposed insert to queue
+        if (current.nodes) {
+          this.queue = this.insertNodesToQueue(current.nodes, this.queue);
+        }
       }
     }
     // dispose one in the dispose queue
     if (this.disposeQueue.length > 0) {
-      this.disposeQueue.shift().disposeNodes();
+      this.disposeQueue.shift().checkIfDisposeNodes();
     }
+
+    console.log(this.disposeQueue.length);
   }
 
   makeQueuesFromNodes(nodes) {
     this.setDistances(nodes);
     const copy = nodes.filter(node => {
-      const term = node.isVisible;
+      const term = node.isRenderable();
       if (!term) {
         this.disposeQueue.push(node);
         return false;
       } return true;
     });
     copy.sort((l, r) => l.distance - r.distance);
+    this.disposeQueue.sort((l, r) => l.distance - r.distance);
     return copy;
   }
 
@@ -133,5 +139,11 @@ export default class Planet {
       node.setDistance(this.scene.activeCamera);
       node.setIsVisible(this.scene.activeCamera);
     });
+  }
+
+  disposeAllInQueue() {
+    while (this.disposeQueue.length > 0) {
+      this.disposeQueue.shift().checkIfDisposeNodes();
+    }
   }
 }
