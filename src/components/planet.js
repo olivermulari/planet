@@ -4,14 +4,6 @@ import Node from './node';
 import { createGlass } from '../scripts/materials';
 import Perlin from './utils/perlin';
 
-/**
- * TODO: way to handle unEnabled nodes
- * 1. a separate dispose array for inactive nodes that check every once in a while
- *    are there any chuncks to dispose -> furthest first
- * 2. dispose loop?
- * 3. update queue more often when there is strong movements?
- * 4. implement advanced pooling instead of disposing nodes?
-*/
 export default class Planet {
   constructor(scene, position, size, resolution) {
     this.radius = size; // radius
