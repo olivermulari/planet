@@ -4,6 +4,9 @@
 - implement advanced pooling instead of disposing nodes?
   -> less object creations
 
+## Create mesh after all vertex data is calculted
+- DON'T UPDATE
+
 ## Scene optimisation
 - Merge meshes that can be merged if its more efficient
 
