@@ -79,6 +79,8 @@ export default class Node {
     vertexData.applyToMesh(customMesh, true);
     customMesh.material = this.material;
     customMesh.cullingStrategy = AbstractMesh.CULLINGSTRATEGY_BOUNDINGSPHERE_ONLY;
+    // applies collisions
+    customMesh.checkCollisions = true;
     return customMesh;
   }
 

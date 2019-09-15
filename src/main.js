@@ -6,7 +6,7 @@ import './styles/style.css';
 window.addEventListener('DOMContentLoaded', function() {
   const scene = createScene();
   // add keycodes
-  addDebugKeycodes(scene);
+  // addDebugKeycodes(scene);
 });
 
 

@@ -2,8 +2,9 @@ import Planet from "../components/planet";
 import * as BABYLON from "@babylonjs/core/Legacy/legacy";
 
 import { createSkybox } from "./skybox";
-import { createArcRotateCamera, updateCameraSpeed } from "./camera";
+import { createArcRotateCamera, createFreeCamera, updateCameraSpeed } from "./camera";
 import { addMaterialsToScene } from "./materials";
+import { enablePhysics } from "./physics";
 
 import * as MobileCheck from "../utils/mobile";
 import { createBall } from "../utils/debugball";
@@ -21,8 +22,12 @@ export function createScene() {
   const light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0,1,0), scene);
   
   // create camera
-  const camera = createArcRotateCamera(scene, planetRadius);
+  //const camera = createArcRotateCamera(scene, planetRadius);
+  const camera = createFreeCamera(scene);
   camera.attachControl(canvas, false);
+
+  // creates gravity
+  const physicsEngine = enablePhysics(scene);
 
   createSkybox(scene);
   createBall(planetCenter, scene);
@@ -35,6 +40,7 @@ export function createScene() {
   scene.registerBeforeRender(function() {
     scene.planet.update();
     // updateCameraSpeed(camera);
+    scene.gravity = scene.activeCamera.globalPosition.negate().normalize().scale(3);
   });
 
   engine.runRenderLoop(function() {

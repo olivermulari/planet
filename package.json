@@ -46,6 +46,7 @@
   },
   "dependencies": {
     "@babylonjs/core": "^4.0.3",
-    "normalize.css": "^8.0.1"
+    "normalize.css": "^8.0.1",
+    "oimo": "^1.0.9"
   }
 }
