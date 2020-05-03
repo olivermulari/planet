@@ -7,7 +7,7 @@ export function createArcRotateCamera(scene, planetRadius) {
   camera.setPosition(new Vector3(0, 40, -1000));
   camera.allowUpsideDown = false;
   camera.minZ = 1;
-  camera.maxZ = 50000;
+  camera.maxZ = 500000;
   camera.lowerRadiusLimit = planetRadius + 10;
   camera.angularSensibilityX = 2000;
   camera.angularSensibilityy = 2000;

@@ -1,7 +1,7 @@
 import { Vector3 } from '@babylonjs/core';
 
 import Node from './node';
-import { createGlass } from '../scripts/materials';
+import { groundMaterial, createMetal, createGlass } from '../scripts/materials';
 import Perlin from './utils/perlin';
 
 export default class Planet {
@@ -10,7 +10,7 @@ export default class Planet {
     this.resolution = resolution;
     this.position = position;
     this.scene = scene;
-    this.material = createGlass(scene, new BABYLON.Color3(0.3, 0.2, 1.0));
+    this.material = createGlass(scene, new BABYLON.Color3(0.85, 0.85, 0.85));
     this.nodes = [];
     this.queue = [];
     this.disposeQueue = [];

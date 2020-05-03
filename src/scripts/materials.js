@@ -3,10 +3,10 @@ import { PBRMaterial, StandardMaterial, Color3 } from "@babylonjs/core";
 export function addMaterialsToScene(scene) {
   // materials
   scene.customMaterials = [
-    createMetal(scene, new BABYLON.Color3(1.0, 0.1, 0.1)),
-    createPlastic(scene, new BABYLON.Color3(0.3, 1.0, 0.3)),
-    createPlastic(scene, new BABYLON.Color3(0.3, 1.0, 1.0)),
-    createMetal(scene, new BABYLON.Color3(0.3, 0.2, 1.0)),
+    createMetal(scene, new Color3(1.0, 0.1, 0.1)),
+    createPlastic(scene, new Color3(0.3, 1.0, 0.3)),
+    createPlastic(scene, new Color3(0.3, 1.0, 1.0)),
+    createMetal(scene, new Color3(0.3, 0.2, 1.0)),
   ];
 }
 
@@ -23,7 +23,7 @@ export function createGlass(scene, color) {
   return glass;
 }
 
-function createMetal(scene, color) {
+export function createMetal(scene, color) {
   const metal = new PBRMaterial("metal", scene);
   metal.reflectionTexture = scene.environmentTexture;
   metal.microSurface = 0.96;
@@ -45,5 +45,11 @@ export function createWireframe(scene) {
   const material = new StandardMaterial("Wireframe", scene);
   material.diffuseColor = new Color3.White();
   material.wireframe = true;
+  return material;
+}
+
+export function groundMaterial(scene) {
+  const material = new StandardMaterial("Ground", scene);
+  material.diffuseColor = new Color3(200 / 255, 200 / 255, 200 / 255);
   return material;
 }

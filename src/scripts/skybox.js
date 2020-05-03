@@ -9,7 +9,7 @@ export function createSkybox(scene) {
   scene.imageProcessingConfiguration.contrast = 1.6;
 
   // Skybox
-  var hdrSkybox = BABYLON.Mesh.CreateBox("hdrSkyBox", 15000.0, scene);
+  var hdrSkybox = BABYLON.Mesh.CreateBox("hdrSkyBox", 100000.0, scene);
   var hdrSkyboxMaterial = new BABYLON.PBRMaterial("skyBox", scene);
   hdrSkyboxMaterial.backFaceCulling = false;
   hdrSkyboxMaterial.reflectionTexture = hdrTexture.clone();
