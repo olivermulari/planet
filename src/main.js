@@ -7,6 +7,11 @@ window.addEventListener('DOMContentLoaded', function() {
   const scene = createScene();
   // add keycodes
   addDebugKeycodes(scene);
+
+  setTimeout(() => {
+    document.getElementById("loading").style.opacity = 0;
+  }, 1000);
+
 });
 
 
