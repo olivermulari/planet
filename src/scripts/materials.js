@@ -4,8 +4,8 @@ export function addMaterialsToScene(scene) {
   // materials
   scene.customMaterials = [
     createMetal(scene, new Color3(1.0, 0.1, 0.1)),
-    createPlastic(scene, new Color3(0.3, 1.0, 0.3)),
-    createPlastic(scene, new Color3(0.3, 1.0, 1.0)),
+    createPlastic(scene, new Color3(0.5, 1.0, 0.5)),
+    createPlastic(scene, new Color3(0.3, 1.0, 0.8)),
     createMetal(scene, new Color3(0.3, 0.2, 1.0)),
   ];
 }

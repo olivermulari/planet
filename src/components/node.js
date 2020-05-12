@@ -27,7 +27,7 @@ export default class Node {
 
     // hacky colors
     this.id = id || -1;
-    this.material = this.planet.material;//this.id == -1 ? this.planet.material : getMaterialByID(this.planet.scene, id);
+    this.material = this.id == -1 ? this.planet.material : getMaterialByID(this.planet.scene, id);
 
     // constants for node recursion
     this.minNodeSize = 1;
